@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kunlik Reja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <!-- 1-OYNA: HAFTA KUNLARI -->
+    <div id="dayModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-[440px] text-center">
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Hafta kunini tanlang</h2>
+            <p class="text-gray-500 text-sm mb-6">Bugun qaysi kun? (Yakshanbadan tashqari)</p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <button onclick="selectDay('Dushanba')"
+                    class="py-3 px-4 bg-gray-100 hover:bg-[#0E0E0E] hover:text-white text-gray-800 font-semibold rounded-xl transition active:scale-95">Dushanba</button>
+                <button onclick="selectDay('Seshanba')"
+                    class="py-3 px-4 bg-gray-100 hover:bg-[#0E0E0E] hover:text-white text-gray-800 font-semibold rounded-xl transition active:scale-95">Seshanba</button>
+                <button onclick="selectDay('Chorshanba')"
+                    class="py-3 px-4 bg-gray-100 hover:bg-[#0E0E0E] hover:text-white text-gray-800 font-semibold rounded-xl transition active:scale-95">Chorshanba</button>
+                <button onclick="selectDay('Payshanba')"
+                    class="py-3 px-4 bg-gray-100 hover:bg-[#0E0E0E] hover:text-white text-gray-800 font-semibold rounded-xl transition active:scale-95">Payshanba</button>
+                <button onclick="selectDay('Juma')"
+                    class="py-3 px-4 bg-gray-100 hover:bg-[#0E0E0E] hover:text-white text-gray-800 font-semibold rounded-xl transition active:scale-95">Juma</button>
+                <button onclick="selectDay('Shanba')"
+                    class="py-3 px-4 bg-gray-100 hover:bg-[#0E0E0E] hover:text-white text-gray-800 font-semibold rounded-xl transition active:scale-95">Shanba</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2-OYNA: TANAFFUS SO'ROVI -->
+    <div id="breakModal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-[400px] text-center">
+            <span id="chosenDayBadge"
+                class="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full mb-3">
+                Dushanba
+            </span>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Bugun tanaffus bo'ldimi?</h2>
+            <p class="text-gray-500 text-sm mb-6">Davom etish uchun javobni tanlang</p>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="selectBreak(true)"
+                    class="w-full py-3 bg-[#0E0E0E] text-white font-semibold rounded-xl hover:bg-gray-800 transition active:scale-95">
+                    Ha
+                </button>
+                <button onclick="selectBreak(false)"
+                    class="w-full py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 transition active:scale-95">
+                    Yo'q
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASOSIY SAHIFA (KUNLIK REJA) -->
+    <div id="mainContent" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-[550px]">
+        <div class="flex items-center justify-between border-b pb-4 mb-6">
+            <div>
+                <h1 id="resDayTitle" class="text-2xl font-bold text-gray-800">Dushanba rejasi</h1>
+                <p id="resBreakSub" class="text-sm text-gray-500 mt-1">Tanaffus: Ha</p>
+            </div>
+            <button onclick="restart()"
+                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold rounded-xl transition">
+                O'zgartirish
+            </button>
+        </div>
+
+        <div id="nav"></div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DUSHANBA
+        // ==========================================
+        const dushanbaHa = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Kitob o'qish" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:00", Qiladigan_Ish: "Tanaffus" },
+            { Vaqt: "14:00", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "15:40", Qiladigan_Ish: "Meva iste'mol qilish, namoz" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Kick up mashq qilish" },
+            { Vaqt: "16:30", Qiladigan_Ish: "Psixologik va fizik dam olish" },
+            { Vaqt: "17:00", Qiladigan_Ish: "IT kursiga ketish, namoz" },
+            { Vaqt: "19:20", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "20:10", Qiladigan_Ish: "Mashq qilish (press, ko'krak)" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+        const dushanbaYoq = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Kitob o'qish" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:20", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "15:00", Qiladigan_Ish: "Kick up mashq qilish" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Psixologik va fizik dam olish, namoz" },
+            { Vaqt: "17:00", Qiladigan_Ish: "IT kursiga ketish, namoz" },
+            { Vaqt: "19:20", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "20:10", Qiladigan_Ish: "Mashq qilish (press, ko'krak)" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+
+        // ==========================================
+        // SESHANBA
+        // ==========================================
+        const seshanbaHa = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Ingliz tili so'z yodlash" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "12:15", Qiladigan_Ish: "Tanaffus" },
+            { Vaqt: "13:30", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "15:00", Qiladigan_Ish: "Mashq qilish Bitsips, namoz" },
+            { Vaqt: "16:20", Qiladigan_Ish: "Uy vazifalarini bajarish, namoz" },
+            { Vaqt: "18:20", Qiladigan_Ish: "Futbolga ketish" },
+            { Vaqt: "20:30", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+        const seshanbaYoq = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Ingliz tili so'z yodlash" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:00", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Mashq qilish Bitsips, namoz" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Boks" },
+            { Vaqt: "17:00", Qiladigan_Ish: "Uy vazifalarini bajarish, namoz" },
+            { Vaqt: "18:20", Qiladigan_Ish: "Futbolga ketish" },
+            { Vaqt: "20:30", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+
+        // ==========================================
+        // CHORSHANBA
+        // ==========================================
+        const chorshanbaHa = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Kitob o'qish" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:00", Qiladigan_Ish: "Tanaffus" },
+            { Vaqt: "14:00", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "15:40", Qiladigan_Ish: "Meva iste'mol qilish, namoz" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Kick up mashq qilish" },
+            { Vaqt: "16:30", Qiladigan_Ish: "Psixologik dam olish" },
+            { Vaqt: "17:00", Qiladigan_Ish: "IT kursiga ketish, namoz" },
+            { Vaqt: "19:20", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "20:10", Qiladigan_Ish: "Mashq qilish (press, ko'krak)" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+        const chorshanbaYoq = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Kitob o'qish" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:20", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Meva iste'mol qilish, namoz" },
+            { Vaqt: "15:00", Qiladigan_Ish: "Kick up mashq qilish" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Psixologik dam olish" },
+            { Vaqt: "17:00", Qiladigan_Ish: "IT kursiga ketish, namoz" },
+            { Vaqt: "19:20", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "20:10", Qiladigan_Ish: "Mashq qilish (press, ko'krak)" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+
+        // ==========================================
+        // PAYSHANBA
+        // ==========================================
+        const payshanbaHa = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Ingliz tili so'z yodlash" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "12:15", Qiladigan_Ish: "Tanaffus" },
+            { Vaqt: "13:30", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "15:00", Qiladigan_Ish: "Mashq qilish Bitsips, namoz" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Kick up mashq qilish" },
+            { Vaqt: "17:00", Qiladigan_Ish: "Uy vazifalarini bajarish, namoz" },
+            { Vaqt: "18:20", Qiladigan_Ish: "Futbolga ketish" },
+            { Vaqt: "20:30", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+        const payshanbaYoq = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Ingliz tili so'z yodlash" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:00", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Mashq qilish Bitsips," },
+            { Vaqt: "16:00", Qiladigan_Ish: "Boks, namoz" },
+            { Vaqt: "17:00", Qiladigan_Ish: "Uy vazifalarini bajarish, namoz" },
+            { Vaqt: "18:20", Qiladigan_Ish: "Futbolga ketish" },
+            { Vaqt: "20:30", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+
+        // ==========================================
+        // JUMA
+        // ==========================================
+        const jumaHa = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Kitob o'qish" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:20", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "15:00", Qiladigan_Ish: "Kick up mashq qilish, namoz" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Psixologik dam olish" },
+            { Vaqt: "17:00", Qiladigan_Ish: "IT kursiga ketish, namoz" },
+            { Vaqt: "19:20", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "20:10", Qiladigan_Ish: "Mashq qilish (press, ko'krak)" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+        const jumaYoq = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Kitob o'qish" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:20", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "15:00", Qiladigan_Ish: "Kick up mashq qilish" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Psixologik va fizik dam olish, namoz" },
+            { Vaqt: "17:00", Qiladigan_Ish: "IT kursiga ketish, namoz" },
+            { Vaqt: "19:20", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "20:10", Qiladigan_Ish: "Mashq qilish (press, ko'krak)" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+
+        // ==========================================
+        // SHANBA
+        // ==========================================
+        const shanbaHa = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Ingliz tili so'z yodlash" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:00", Qiladigan_Ish: "Tanaffus" },
+            { Vaqt: "14:00", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "15:00", Qiladigan_Ish: "Mashq qilish Bitsips" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Kick up mashq qilish, namoz" },
+            { Vaqt: "17:00", Qiladigan_Ish: "Uy vazifalarini bajarish, namoz" },
+            { Vaqt: "18:20", Qiladigan_Ish: "Futbolga ketish" },
+            { Vaqt: "20:30", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+        const shanbaYoq = [
+            { Vaqt: "5:00", Qiladigan_Ish: "Uyg'onish, yengil gimastika, namoz" },
+            { Vaqt: "5:30", Qiladigan_Ish: "Yugurish, mashq qilish" },
+            { Vaqt: "6:30", Qiladigan_Ish: "Ingliz tili so'z yodlash" },
+            { Vaqt: "7:00", Qiladigan_Ish: "Nonushta qilib, maktabga tayyorlanish" },
+            { Vaqt: "7:30", Qiladigan_Ish: "Maktabga ketish" },
+            { Vaqt: "10:25", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "13:20", Qiladigan_Ish: "Namoz, tushlik qilish" },
+            { Vaqt: "14:40", Qiladigan_Ish: "Meva iste'mol qilish" },
+            { Vaqt: "15:00", Qiladigan_Ish: "Mashq qilish Bitsips" },
+            { Vaqt: "16:00", Qiladigan_Ish: "Kick up mashq qilish, namoz" },
+            { Vaqt: "17:00", Qiladigan_Ish: "Uy vazifalarini bajarish, namoz" },
+            { Vaqt: "18:20", Qiladigan_Ish: "Futbolga ketish" },
+            { Vaqt: "20:30", Qiladigan_Ish: "Kechki ovqat, namoz" },
+            { Vaqt: "21:00", Qiladigan_Ish: "Uxlash" }
+        ];
+
+        // Obyektga yig'ib qo'shamiz
+        const allDaysData = {
+            "Dushanba": { ha: dushanbaHa, yoq: dushanbaYoq },
+            "Seshanba": { ha: seshanbaHa, yoq: seshanbaYoq },
+            "Chorshanba": { ha: chorshanbaHa, yoq: chorshanbaYoq },
+            "Payshanba": { ha: payshanbaHa, yoq: payshanbaYoq },
+            "Juma": { ha: jumaHa, yoq: jumaYoq },
+            "Shanba": { ha: shanbaHa, yoq: shanbaYoq }
+        };
+
+        const dayModal = document.getElementById('dayModal');
+        const breakModal = document.getElementById('breakModal');
+        const mainContent = document.getElementById('mainContent');
+        const nav = document.getElementById('nav');
+
+        let selectedDay = '';
+
+        function selectDay(day) {
+            selectedDay = day;
+            document.getElementById('chosenDayBadge').innerText = day;
+
+            dayModal.classList.add('hidden');
+            dayModal.classList.remove('flex');
+
+            breakModal.classList.remove('hidden');
+            breakModal.classList.add('flex');
+        }
+
+        function selectBreak(hasBreak) {
+            breakModal.classList.add('hidden');
+            breakModal.classList.remove('flex');
+
+            mainContent.classList.remove('hidden');
+
+            document.getElementById('resDayTitle').innerText = `${selectedDay} kunlik rejasi`;
+            document.getElementById('resBreakSub').innerText = hasBreak ? "Tanaffus: Bo'ldi ✅" : "Tanaffus: Bo'lmadi ❌";
+
+            // Agar Ha (true) bo'lsa 1-array, Yo'q (false) bo'lsa 2-array chiqadi
+            let chosenSchedule = hasBreak ? allDaysData[selectedDay].ha : allDaysData[selectedDay].yoq;
+
+            renderSchedule(chosenSchedule);
+        }
+
+        function renderSchedule(data) {
+            nav.innerHTML = '';
+
+            data.forEach(e => {
+                let div = document.createElement('div');
+                div.className = 'flex items-center gap-[15px] sm:gap-[25px] mb-[12px] p-2 rounded-lg hover:bg-gray-50 transition';
+                div.innerHTML = `
+                    <p class="text-[18px] sm:text-[20px] font-[600] w-[65px] shrink-0 text-right text-gray-800">${e.Vaqt}</p>
+                    <span class="text-gray-400">—</span>
+                    <div class="flex items-start text-start flex-1">
+                        <p class="text-[16px] sm:text-[18px] font-[500] text-gray-700">${e.Qiladigan_Ish}</p>
+                    </div>
+                `;
+                nav.append(div);
+            });
+        }
+
+        function restart() {
+            mainContent.classList.add('hidden');
+
+            dayModal.classList.remove('hidden');
+            dayModal.classList.add('flex');
+        }
+    </script>
+
+</body>
+
+</html>
